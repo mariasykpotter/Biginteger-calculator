@@ -32,8 +32,8 @@ class TestBigInteger(unittest.TestCase):
                          "3 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5")
 
     def test_comparison(self):
-        self.assertEqual(self.big1.more(self.big2), False)
-        self.assertEqual(self.big2.more_and_eq(self.big1), True)
+        self.assertEqual(self.big1 > self.big2, False)
+        self.assertEqual(self.big2 >= self.big2, True)
         self.assertEqual(self.big3 == self.big2, True)
 
     def test_arithmethics(self):
@@ -43,9 +43,9 @@ class TestBigInteger(unittest.TestCase):
                          "79998999999444444444444451111099999999999999999997777776666666666666655555334")
         self.assertEqual((self.big1 * self.big2).toString(),
                          "899990000049999444444444511112111103703703703703681481655553209876543098763138742752962901234567901105920986419753086419753075802222098765432098774074247")
-        self.assertEqual((self.big1.div(self.big2)).toString(), "0")
-        self.assertEqual((self.big2.div(self.big1)).toString(), "8")
-        self.assertEqual((self.big2.ostacha(self.big1)).toString(),
+        self.assertEqual((self.big1 // self.big2).toString(), "0")
+        self.assertEqual((self.big2 // self.big1).toString(), "8")
+        self.assertEqual((self.big2 % self.big1).toString(),
                          "9998999995555555555555562222133333333333333333331111102222222222222211110895")
         self.assertEqual((self.big1 ** self.big4).toString(),
                          '100000000011111111111419753086641975308654320987654321009876666667901234567885679012369506172839506172839488890123456790123456790121728395061728395061729')
@@ -54,27 +54,26 @@ class TestBigInteger(unittest.TestCase):
         self.assertEqual((self.big9 + self.big10).minus, True)
         self.assertEqual((self.big9 - self.big10).minus, True)
         self.assertEqual((self.big9 * self.big10).minus, True)
-        self.assertEqual((self.big8.div(self.big7)).toString(), "36029")
-        self.assertEqual((self.big8.div(self.big7)).minus, True)
-        self.assertEqual((self.big8.div(self.big9)).minus, False)
-        self.assertEqual((self.big8.div(self.big9)).toString(), "1835")
-        self.assertEqual((self.big9.div(self.big10)).toString(), "5")
-        self.assertEqual((self.big9.div(self.big10)).minus, True)
+        self.assertEqual((self.big8 // self.big7).toString(), "36029")
+        self.assertEqual((self.big8 // self.big7).minus, True)
+        self.assertEqual((self.big8 // self.big9).minus, False)
+        self.assertEqual((self.big8 // self.big9).toString(), "1835")
+        self.assertEqual((self.big9 // self.big10).toString(), "5")
+        self.assertEqual((self.big9 // self.big10).minus, True)
 
     def test_bitwis_ops(self):
-        self.assertEqual((self.big6.bigint_to_bin().toString()), "1000111010111")
+        self.assertEqual(self.big6.bigint_to_bin().toString(), "1000111010111")
         self.num = (self.big6.bigint_to_bin())
         self.assertEqual(self.num.bin_to_bigint().toString(), "4567")
-        self.assertEqual(self.big7.bitwise_ops(self.big6, "&").toString(),
+        self.assertEqual((self.big7 & self.big6).toString(),
                          str(int(self.big6.toString()) & int(self.big7.toString())))
-        self.assertEqual(self.big7.bitwise_ops(self.big6, "^").toString(),
+        self.assertEqual((self.big7 ^ self.big6).toString(),
                          str(int(self.big6.toString()) ^ int(self.big7.toString())))
-        self.assertEqual(self.big7.bitwise_ops(self.big6, "|").toString(),
+        self.assertEqual((self.big7 | self.big6).toString(),
                          str(int(self.big6.toString()) | int(self.big7.toString())))
-        self.assertEqual(self.big7.shift_right(3).toString(),
+        self.assertEqual((self.big7 >> 3).toString(),
                          str(int(self.big7.toString()) >> 3))
-        self.assertEqual(self.big7.shift_left(5).toString(),
-                         str(int(self.big7.toString()) << 5))
+        self.assertEqual((self.big7 << 5).toString(), str(int(self.big7.toString()) << 5))
 
 
 if __name__ == "__main__":
