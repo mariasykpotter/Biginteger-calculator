@@ -1,80 +1,625 @@
-import unittest
-from biginteger import BigInteger
+class BigInteger:
+    '''The class for BigInteger representation'''
+
+    def __init__(self, minus=False, line="0"):
+        '''Initialises a BigInteger class'''
+        self.head = None
+        self.tail = None
+        self.minus = minus
+        if int(line):
+            for el in line:
+                new_node = Node(int(el))
+                if self.head is None:
+                    self.head = self.tail = new_node
+                else:
+                    new_node.prev = self.tail
+                    new_node.next = None
+                    self.tail.next = new_node
+                    self.tail = new_node
+
+    def append_to_num(self, data):
+        '''
+        Adds a number to the linked list
+        :param data: int
+        :return: None
+        '''
+        new_node = Node(data)
+
+        if self.head is None:
+            self.head = self.tail = new_node
+        else:
+            new_node.prev = self.tail
+            new_node.next = None
+            self.tail.next = new_node
+            self.tail = new_node
+
+    def delete(self):
+        '''Deletes a linkedlist'''
+        self.head = self.tail = None
+
+    def show(self):
+        '''
+        Shows the two_linked list. Analogic to method toString
+        :return: str
+        '''
+        text = ""
+        if self.head is None:
+            text = str(None)
+        else:
+            current_node = self.head
+            while current_node is not None:
+                if current_node.next is None:
+                    text += str(current_node.data)
+                    break
+                else:
+                    text += str(current_node.data) + " - "
+                    current_node = current_node.next
+        return text
+
+    def reverse(self):
+        pass
+
+    def __add__(self, rhsInt):
+        '''
+        Adds two linked lists
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        if self.minus == rhsInt.minus:
+            new_num = self.add(rhsInt)
+            new_num.minus = self.minus
+            return new_num
+        elif self.minus and (not rhsInt.minus):
+            if self >= rhsInt:
+                new_num = self.subtract(rhsInt)
+                new_num.minus = self.minus
+                return new_num
+            else:
+                new_num = rhsInt.subtract(self)
+                new_num.minus = rhsInt.minus
+                return new_num
+        elif rhsInt.minus and (not self.minus):
+            if self >= rhsInt:
+                new_num = self.subtract(rhsInt)
+                new_num.minus = self.minus
+                return new_num
+            else:
+                new_num = rhsInt.subtract(self)
+                new_num.minus = rhsInt.minus
+                return new_num
+
+    def __sub__(self, rhsInt):
+        '''
+        Subtracrts tow BigInteger numbers
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        if not self.minus and not rhsInt.minus:
+            if self >= rhsInt:
+                new_num = self.subtract(rhsInt)
+                new_num.minus = self.minus
+                return new_num
+            else:
+                new_num = rhsInt.subtract(self)
+                new_num.minus = True
+                return new_num
+        elif self.minus and rhsInt.minus:
+            if self >= rhsInt:
+                new_num = self.subtract(rhsInt)
+                new_num.minus = True
+                return new_num
+            else:
+                new_num = rhsInt.subtract(self)
+                new_num.minus = False
+                return new_num
+        elif self.minus and not rhsInt.minus:
+            new_num = rhsInt.add(self)
+            new_num.minus = True
+            return new_num
+        elif not self.minus and rhsInt.minus:
+            new_num = rhsInt.add(self)
+            new_num.minus = False
+            return new_num
+
+    def add(self, rhsInt):
+        '''
+        Add BigInteger with minus and plus signs
+        :param rhsInt:
+        :return:
+        '''
+        lst_values = []
+        newnum = BigInteger()
+        NodeA = self.tail
+        NodeB = rhsInt.tail
+        # Add corresponding terms until one list is empty.
+        mem = 0
+        while NodeA is not None or NodeB is not None:
+            if NodeA == None:
+                node1 = 0
+                node2 = NodeB.data
+                NodeB = NodeB.prev
+            elif NodeB == None:
+                node2 = 0
+                node1 = NodeA.data
+                NodeA = NodeA.prev
+            else:
+                node1 = NodeA.data
+                node2 = NodeB.data
+                NodeA = NodeA.prev
+                NodeB = NodeB.prev
+            value = (node1 + node2 + mem) % 10
+            lst_values.append(value)
+            mem = (node1 + node2 + mem) // 10
+        if mem:
+            lst_values.append(mem)
+        lst_values.reverse()
+        for el in lst_values:
+            newnum.append_to_num(el)
+
+        return newnum
+
+    def subtract(self, rhsInt):
+        '''
+        Subtract 2 BigIntegers
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        lst_values = []
+        newnum = BigInteger()
+        NodeA = self.tail
+        NodeB = rhsInt.tail
+        mem = 0
+        while NodeA is not None or NodeB is not None:
+            use_memory = False
+            if NodeA == None:
+                node1 = 0
+                node2 = NodeB.data
+                NodeB = NodeB.prev
+            elif NodeB == None:
+                node2 = 0
+                node1 = NodeA.data
+                NodeA = NodeA.prev
+            else:
+                node1 = NodeA.data
+                node2 = NodeB.data
+                NodeA = NodeA.prev
+                NodeB = NodeB.prev
+            if node1 + mem < node2:
+                node1 += 10
+                use_memory = True
+            value = (node1 - node2 + mem) % 10
+            if use_memory:
+                mem = -1
+            else:
+                mem = 0
+            lst_values.append(value)
+        while lst_values and len(lst_values) >= 2:
+            if lst_values[-1] == 0:
+                lst_values.pop()
+            else:
+                break
+        lst_values.reverse()
+        for el in lst_values:
+            newnum.append_to_num(el)
+        return newnum
+
+    def mul(self, num):
+        '''
+        Multiplies BigInteger on num
+        :param num: int
+        :return: BigInteger
+        '''
+        lst = []
+        mem = 0
+        new_num = BigInteger()
+        NodeA = self.tail
+        while NodeA is not None:
+            node1 = NodeA.data
+            el1 = num * node1
+            value = (el1 + mem) % 10
+            mem = (el1 + mem) // 10
+            NodeA = NodeA.prev
+            lst.append(value)
+        if mem:
+            lst.append(mem)
+        lst.reverse()
+        for el in lst:
+            new_num.append_to_num(el)
+        return new_num
+
+    def __mul__(self, rhsInt):
+        '''
+        Multiplying one BigInteger on another
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        count = 0
+        if len(self) > len(rhsInt):
+            NodeB = rhsInt.tail
+            obj = self
+        else:
+            NodeB = self.tail
+            obj = rhsInt
+        suma = BigInteger()
+        suma.append_to_num(0)
+        while NodeB is not None:
+            multiplier = obj.mul(NodeB.data)
+            for i in range(count):
+                multiplier.append_to_num(0)
+            suma = suma + multiplier
+            NodeB = NodeB.prev
+            count += 1
+        if self.minus == rhsInt.minus:
+            suma.minus = False
+        else:
+            suma.minus = True
+        return suma
+
+    def __floordiv__(self, rhsInt):
+        '''
+        Divide one BigInteger on another
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        subtraction = self
+        count = BigInteger()
+        count.append_to_num(1)
+        dilnyk = BigInteger()
+        dilnyk.append_to_num(0)
+        while subtraction >= rhsInt:
+            subtraction = subtraction.subtract(rhsInt)
+            dilnyk = dilnyk + count
+        if self.minus != rhsInt.minus:
+            dilnyk.minus = True
+        return dilnyk
+
+    def __mod__(self, rhsInt):
+        '''
+        Ostacha forom division of one BigInteger on another
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        return self - (rhsInt * (self // rhsInt))
+
+    def parne(self):
+        '''
+        Defines whether the BigInteger is even
+        :return:bool
+        '''
+        new_num = BigInteger("0")
+        new_num1 = BigInteger()
+        new_num1.append_to_num("2")
+        if self % new_num1 == new_num:
+            return True
+        else:
+            return False
+
+    def power(self, rhsInt):
+        '''
+        Brings one BigInteger to another BigInteger degree
+        :param rhsInt: BigInteger
+        :return: BigInteger
+        '''
+        new_num = self
+        counter = BigInteger()
+        counter.append_to_num(1)
+        adder = BigInteger()
+        adder.append_to_num(1)
+        while rhsInt > counter:
+            new_num = new_num * self
+            counter += adder
+        return new_num
+
+    def __pow__(self, rhsInt):
+        '''
+        Brings one BigInteger to another BigInteger degree both with plus or minus sign
+        :param rhsInt:
+        :return:
+        '''
+        null = BigInteger()
+        null.append_to_num(0)
+        odyn = BigInteger()
+        odyn.append_to_num(1)
+        if rhsInt.minus:
+            new_num = odyn // self.power(rhsInt)
+        else:
+            new_num = self.power(rhsInt)
+        if self.minus:
+            if not rhsInt.parne():
+                new_num.minus = True
+        return new_num
+
+    def toString(self):
+        text = ""
+        curNode = self.head
+        while curNode is not None:
+            text += str(curNode.data)
+            curNode = curNode.next
+        return text
+
+    def __len__(self):
+        '''
+        The length of BigInteger
+        :return: int
+        '''
+        size = 0
+        curNode = self.head
+        while curNode is not None:
+            size += 1
+            curNode = curNode.next
+        return size
+
+    def __gt__(self, other):
+        '''
+        Compare self with other.Self>Other
+        :param other: BigInteger
+        :return: bool
+        '''
+        if len(self) > len(other):
+            return True
+        elif len(self) == len(other):
+            NodeA = self.head
+            NodeB = other.head
+            while NodeA is not None:
+                if NodeA.data > NodeB.data:
+                    return True
+                else:
+                    if NodeA and NodeB:
+                        if NodeA.data == NodeB.data:
+                            NodeA = NodeA.next
+                            NodeB = NodeB.next
+                        else:
+                            return False
+            return False
+        else:
+            return False
+
+    def __ge__(self, other):
+        '''
+        Compare self with other.Self >= Other
+        :param
+        other: BigInteger
+        :return: bool
+        '''
+        count = 0
+        if len(self) > len(other):
+            return True
+        elif len(self) == len(other):
+            NodeA = self.head
+            NodeB = other.head
+            while NodeA is not None:
+                if NodeA.data > NodeB.data:
+                    return True
+                else:
+                    if NodeA and NodeB:
+                        if NodeA.data == NodeB.data:
+                            count += 1
+                        else:
+                            return False
+                NodeA = NodeA.next
+                NodeB = NodeB.next
+            if count == len(self):
+                return True
+        else:
+            return False
+
+    def __eq__(self, other):
+        '''
+        Compare self with other.Self == Other
+        :param
+        other: BigInteger
+        :return: bool
+        '''
+        if len(self) == len(other):
+            NodeA = self.head
+            NodeB = other.head
+            while NodeA is not None:
+                if NodeA.data == NodeB.data:
+                    NodeA = NodeA.next
+                    NodeB = NodeB.next
+                else:
+                    return False
+            return True
+        else:
+            return False
+
+    def bigint_to_bin(self):
+        '''
+        Converts BigInteger to binary
+        :return: BigInteger
+        '''
+        lst = []
+        dwa = BigInteger()
+        dwa.append_to_num(2)
+        null = BigInteger()
+        null.append_to_num(0)
+        one = BigInteger()
+        one.append_to_num(1)
+        new_num = BigInteger()
+        ost = self % dwa
+        dilene = self // dwa
+        lst.append(ost.toString())
+        while dilene >= dwa:
+            ost = dilene % dwa
+            dilene = dilene // dwa
+            lst.append(ost.toString())
+        lst.append(dilene.toString())
+        lst.reverse()
+        for el in lst:
+            new_num.append_to_num(int(el))
+        return new_num
+
+    def bin_to_bigint(self):
+        '''
+        Converts binary BigInteger back to the BigInteger
+        :return: BigInteger
+        '''
+        new_num = BigInteger()
+        new_num.append_to_num(0)
+        curnode = self.tail
+        i = 0
+        while curnode is not None:
+            if curnode.data:
+                num = BigInteger()
+                num.append_to_num(2 ** i)
+                new_num = new_num + num
+            i += 1
+            curnode = curnode.prev
+        return new_num
+
+    def __and__(self, other):
+        '''
+        Does dependent on the & operator.
+        :param other: BigInteger
+        :param operator: str
+        :return: BigInteger
+        '''
+        try:
+            assert self.minus == False and other.minus == False
+        except AssertionError:
+            print("BigInteger should be more than 0")
+        lst = []
+        self = self.bigint_to_bin()
+        other = other.bigint_to_bin()
+        Node1 = self.tail
+        Node2 = other.tail
+        new_num = BigInteger()
+        while Node1 is not None or Node2 is not None:
+            if Node1 == None:
+                node1 = 0
+                node2 = Node2.data
+                Node2 = Node2.prev
+            elif Node2 == None:
+                node2 = 0
+                node1 = Node1.data
+                Node1 = Node1.prev
+            else:
+                node1 = Node1.data
+                node2 = Node2.data
+                Node1 = Node1.prev
+                Node2 = Node2.prev
+            num = node1 & node2
+            lst.append(num)
+        lst.reverse()
+        for el in lst:
+            new_num.append_to_num(el)
+        return new_num.bin_to_bigint()
+
+    def __or__(self, other):
+        '''
+        Does dependent on the | operator.
+        :param other: BigInteger
+        :param operator: str
+        :return: BigInteger
+        '''
+        try:
+            assert self.minus == False and other.minus == False
+        except AssertionError:
+            print("BigInteger should be more than 0")
+        lst = []
+        self = self.bigint_to_bin()
+        other = other.bigint_to_bin()
+        Node1 = self.tail
+        Node2 = other.tail
+        new_num = BigInteger()
+        while Node1 is not None or Node2 is not None:
+            if Node1 == None:
+                node1 = 0
+                node2 = Node2.data
+                Node2 = Node2.prev
+            elif Node2 == None:
+                node2 = 0
+                node1 = Node1.data
+                Node1 = Node1.prev
+            else:
+                node1 = Node1.data
+                node2 = Node2.data
+                Node1 = Node1.prev
+                Node2 = Node2.prev
+            num = node1 | node2
+            lst.append(num)
+        lst.reverse()
+        for el in lst:
+            new_num.append_to_num(el)
+        return new_num.bin_to_bigint()
+
+    def __xor__(self, other):
+        '''
+        Does dependent on ^ operator.
+        :param other: BigInteger
+        :param operator: str
+        :return: BigInteger
+        '''
+        try:
+            assert self.minus == False and other.minus == False
+        except AssertionError:
+            print("BigInteger should be more than 0")
+        lst = []
+        self = self.bigint_to_bin()
+        other = other.bigint_to_bin()
+        Node1 = self.tail
+        Node2 = other.tail
+        new_num = BigInteger()
+        while Node1 is not None or Node2 is not None:
+            if Node1 == None:
+                node1 = 0
+                node2 = Node2.data
+                Node2 = Node2.prev
+            elif Node2 == None:
+                node2 = 0
+                node1 = Node1.data
+                Node1 = Node1.prev
+            else:
+                node1 = Node1.data
+                node2 = Node2.data
+                Node1 = Node1.prev
+                Node2 = Node2.prev
+            num = node1 ^ node2
+            lst.append(num)
+        lst.reverse()
+        for el in lst:
+            new_num.append_to_num(el)
+        return new_num.bin_to_bigint()
+
+    def __rshift__(self, n):
+        '''
+         Shifts BigInteger on n positions
+         :param n: int
+         :return: BigInteger
+         '''
+        try:
+            assert self.minus == False
+        except AssertionError:
+            print("BigInteger should be more than 0")
+        new_num = BigInteger()
+        new_num.append_to_num(2 ** n)
+        self = self // new_num
+        return self
+
+    def __lshift__(self, n):
+        '''
+        Shifts BigInteger on n positions
+        :param n: int
+        :return: BigInteger
+        '''
+        try:
+            assert self.minus == False
+        except AssertionError:
+            print("BigInteger should be more than 0")
+        new_num = BigInteger()
+        new_num.append_to_num(2 ** n)
+        self = self * (new_num)
+        return self
 
 
-class TestBigInteger(unittest.TestCase):
+class Node:
+    '''Represents a Node class'''
 
-    def setUp(self):
-        data_file = open("data.txt", "r")
-        self.data_list = data_file.read().split("\n")
-        data_file.close()
-        minus = [False] * 10
-        for i in range(len(self.data_list)):
-            if len(self.data_list[i]) > 1:
-                if self.data_list[i][0] == "-":
-                    self.data_list[i] = self.data_list[i].replace("-", "")
-                    minus[i] = True
-        self.big1 = BigInteger(minus[0], self.data_list[0])
-        self.big2 = BigInteger(minus[1], self.data_list[1])
-        self.big3 = BigInteger(minus[2], self.data_list[2])
-        self.big4 = BigInteger(minus[3], self.data_list[3])
-        self.big5 = BigInteger(minus[4], self.data_list[4])
-        self.big6 = BigInteger(minus[5], self.data_list[5])
-        self.big7 = BigInteger(minus[6], self.data_list[6])
-        self.big8 = BigInteger(minus[7], self.data_list[7])
-        self.big9 = BigInteger(minus[8], self.data_list[8])
-        self.big10 = BigInteger(minus[9], self.data_list[9])
-
-    def test_string(self):
-        self.assertEqual(self.big1.toString(), self.data_list[0])
-        self.assertEqual(self.big2.toString(), self.data_list[1])
-        self.assertEqual(self.big5.show(),
-                         "3 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 4 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5 - 5")
-
-    def test_comparison(self):
-        self.assertEqual(self.big1 > self.big2, False)
-        self.assertEqual(self.big2 >= self.big2, True)
-        self.assertEqual(self.big3 == self.big2, True)
-
-    def test_arithmethics(self):
-        self.assertEqual((self.big1 + self.big2).toString(),
-                         "99999000000555555555555562222233333333333333333331111112222222222222211110888")
-        self.assertEqual((self.big1 - self.big2).toString(),
-                         "79998999999444444444444451111099999999999999999997777776666666666666655555334")
-        self.assertEqual((self.big1 * self.big2).toString(),
-                         "899990000049999444444444511112111103703703703703681481655553209876543098763138742752962901234567901105920986419753086419753075802222098765432098774074247")
-        self.assertEqual((self.big1 // self.big2).toString(), "0")
-        self.assertEqual((self.big2 // self.big1).toString(), "8")
-        self.assertEqual((self.big2 % self.big1).toString(),
-                         "9998999995555555555555562222133333333333333333331111102222222222222211110895")
-        self.assertEqual((self.big1 ** self.big4).toString(),
-                         '100000000011111111111419753086641975308654320987654321009876666667901234567885679012369506172839506172839488890123456790123456790121728395061728395061729')
-
-    def test_dodatny_vidjemny(self):
-        self.assertEqual((self.big9 + self.big10).minus, True)
-        self.assertEqual((self.big9 - self.big10).minus, True)
-        self.assertEqual((self.big9 * self.big10).minus, True)
-        self.assertEqual((self.big8 // self.big7).toString(), "36029")
-        self.assertEqual((self.big8 // self.big7).minus, True)
-        self.assertEqual((self.big8 // self.big9).minus, False)
-        self.assertEqual((self.big8 // self.big9).toString(), "1835")
-        self.assertEqual((self.big9 // self.big10).toString(), "5")
-        self.assertEqual((self.big9 // self.big10).minus, True)
-
-    def test_bitwis_ops(self):
-        self.assertEqual(self.big6.bigint_to_bin().toString(), "1000111010111")
-        self.num = (self.big6.bigint_to_bin())
-        self.assertEqual(self.num.bin_to_bigint().toString(), "4567")
-        self.assertEqual((self.big7 & self.big6).toString(),
-                         str(int(self.big6.toString()) & int(self.big7.toString())))
-        self.assertEqual((self.big7 ^ self.big6).toString(),
-                         str(int(self.big6.toString()) ^ int(self.big7.toString())))
-        self.assertEqual((self.big7 | self.big6).toString(),
-                         str(int(self.big6.toString()) | int(self.big7.toString())))
-        self.assertEqual((self.big7 >> 3).toString(),
-                         str(int(self.big7.toString()) >> 3))
-        self.assertEqual((self.big7 << 5).toString(), str(int(self.big7.toString()) << 5))
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def __init__(self, data):
+        '''
+        Initialises Node
+        :param data: str
+        '''
+        self.next = None
+        self.data = data
+        self.prev = None
